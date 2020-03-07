@@ -7,14 +7,6 @@ impl<T> PriorityQueue<T> where T: Ord + Eq + PartialEq {
         PriorityQueue(Vec::new())
     }
 
-    // Panics if accessing missing element
-    fn value_at(vec: &Vec<T>, idx: usize) -> &T {
-        match vec.get(idx) {
-            Some(elem) => elem,
-            None => panic!("value_at() panicked. Bill can't code!!")
-        }
-    }
-
     pub fn remove_max(&mut self) -> Option<T> {
         let len = self.0.len();
         if len == 0 { return None; }
@@ -38,9 +30,9 @@ impl<T> PriorityQueue<T> where T: Ord + Eq + PartialEq {
 
             println!("Parent: {}, a: {}, b: {}", parent_idx, a_idx, b_idx);
 
-            let parent_val = PriorityQueue::value_at(vec, parent_idx);
-            let a_val = PriorityQueue::value_at(vec, a_idx);
-            let b_val = if len > b_idx { PriorityQueue::value_at(vec, b_idx) } else { a_val };
+            let parent_val = &vec[parent_idx - 1];
+            let a_val = &vec[a_idx - 1];
+            let b_val = if len > b_idx { &vec[b_idx - 1] } else { a_val };
 
             let (max_child_idx, max_child_val) = match a_val.cmp(b_val) {
                 Ordering::Less => {
@@ -74,8 +66,8 @@ impl<T> PriorityQueue<T> where T: Ord + Eq + PartialEq {
         let mut parent_idx = inserted_idx / 2;
 
         while parent_idx > 0 {
-            let inserted_val = PriorityQueue::value_at(vec, inserted_idx - 1);
-            let parent_val = PriorityQueue::value_at(vec, parent_idx - 1);
+            let inserted_val = &vec[inserted_idx - 1];
+            let parent_val = &vec[parent_idx - 1];
 
             match inserted_val.cmp(parent_val) {
                 Ordering::Greater => {
