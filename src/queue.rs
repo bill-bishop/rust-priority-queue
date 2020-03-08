@@ -1,6 +1,6 @@
 use std::cmp::Ordering;
 
-struct PriorityQueue<T>(Vec<T>);
+pub struct PriorityQueue<T>(pub Vec<T>);
 
 impl<T> PriorityQueue<T> where T: Ord + Eq + PartialEq {
     pub fn new() -> Self {
@@ -28,8 +28,6 @@ impl<T> PriorityQueue<T> where T: Ord + Eq + PartialEq {
                 break;
             }
 
-            println!("Parent: {}, a: {}, b: {}", parent_idx, a_idx, b_idx);
-
             let parent_val = &vec[parent_idx - 1];
             let a_val = &vec[a_idx - 1];
             let b_val = if len > b_idx { &vec[b_idx - 1] } else { a_val };
@@ -42,7 +40,9 @@ impl<T> PriorityQueue<T> where T: Ord + Eq + PartialEq {
             };
 
             if let Ordering::Greater = max_child_val.cmp(parent_val) {
-                vec.swap(parent_idx, max_child_idx);
+                println!("Swapping {} -> {}", parent_idx, max_child_idx);
+
+                vec.swap(parent_idx - 1, max_child_idx - 1);
                 parent_idx = max_child_idx;
                 continue;
             }
@@ -89,6 +89,7 @@ impl<T> PriorityQueue<T> where T: Ord + Eq + PartialEq {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::node::*;
 
     #[test]
     fn basics() {
@@ -113,6 +114,58 @@ mod tests {
         assert_eq!(pq.remove_max(), Some(0));
         assert_eq!(pq.remove_max(), Some(-999));
         assert_eq!(pq.remove_max(), None);
+
+        pq.insert(2);
+        pq.insert(1);
+        pq.insert(5);
+        pq.insert(3);
+        pq.insert(6);
+
+        assert_eq!(pq.remove_max(), Some(6));
+        assert_eq!(pq.remove_max(), Some(5));
+        assert_eq!(pq.remove_max(), Some(3));
+        assert_eq!(pq.remove_max(), Some(2));
+        assert_eq!(pq.remove_max(), Some(1));
+    }
+
+    #[test]
+    fn numbers() {
+        let mut pq: PriorityQueue<i32> = PriorityQueue::new();
+
+        pq.insert(2);
+        pq.insert(5);
+        pq.insert(1);
+        pq.insert(3);
+        pq.insert(6);
+
+        assert_eq!(pq.0[0], 6);
+        assert_eq!(pq.0[1], 5);
+        assert_eq!(pq.0[2], 1);
+        assert_eq!(pq.0[3], 2);
+        assert_eq!(pq.0[4], 3);
+
+        assert_eq!(pq.remove_max(), Some(6));
+        assert_eq!(pq.remove_max(), Some(5));
+        assert_eq!(pq.remove_max(), Some(3));
+        assert_eq!(pq.remove_max(), Some(2)); // broken
+        assert_eq!(pq.remove_max(), Some(1));
+    }
+
+    #[test]
+    fn nodes() {
+        let mut pq: PriorityQueue<Node<i32>> = PriorityQueue::new();
+
+        pq.insert(Node { elem: 4, count: 2 });
+        pq.insert(Node { elem: 2, count: 5 });
+        pq.insert(Node { elem: 5, count: 1 });
+        pq.insert(Node { elem: 3, count: 3 });
+        pq.insert(Node { elem: 1, count: 6 });
+
+        assert_eq!(pq.remove_max(), Some(Node { elem:1, count: 6 }));
+        assert_eq!(pq.remove_max(), Some(Node { elem:2, count: 5 }));
+        assert_eq!(pq.remove_max(), Some(Node { elem:3, count: 3 }));
+        assert_eq!(pq.remove_max(), Some(Node { elem:4, count: 2 })); // broken
+        assert_eq!(pq.remove_max(), Some(Node { elem:5, count: 1 }));
     }
 
     #[test]
