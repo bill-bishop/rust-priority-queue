@@ -27,13 +27,12 @@ impl<T> PriorityQueue<T> where T: Ord + Eq + PartialEq {
             let b_idx = a_idx + 1;
 
             if a_idx - 1 >= len {
-                println!("remove_max() stopping - {} out of bounds.", a_idx - 1);
                 break;
             }
 
             let parent_val = &vec[parent_idx - 1];
             let a_val = &vec[a_idx - 1];
-            let b_val = if len > b_idx { &vec[b_idx - 1] } else { a_val };
+            let b_val = if len > b_idx - 1 { &vec[b_idx - 1] } else { a_val };
 
             let (max_child_idx, max_child_val) = match a_val.cmp(b_val) {
                 Ordering::Less => {
@@ -43,14 +42,11 @@ impl<T> PriorityQueue<T> where T: Ord + Eq + PartialEq {
             };
 
             if let Ordering::Greater = max_child_val.cmp(parent_val) {
-                println!("Swapping {} -> {}", parent_idx, max_child_idx);
-
                 vec.swap(parent_idx - 1, max_child_idx - 1);
                 parent_idx = max_child_idx;
                 continue;
             }
             else {
-                println!("remove_max() stopping - Max Child Position {}, Parent Position {}", max_child_idx, parent_idx);
                 break;
             }
         }
@@ -75,8 +71,6 @@ impl<T> PriorityQueue<T> where T: Ord + Eq + PartialEq {
 
             match inserted_val.cmp(parent_val) {
                 Ordering::Greater => {
-                    println!("Swapping {} -> {}", inserted_idx, parent_idx);
-
                     vec.swap(inserted_idx - 1, parent_idx - 1);
 
                     inserted_idx = inserted_idx / 2;
@@ -144,6 +138,23 @@ mod tests {
 
         assert_eq!(pq.0.len(), 2);
         assert_eq!(pq.0[0], 2);
+    }
+
+    #[test]
+    fn removal_weird() {
+        let mut pq: PriorityQueue<i32> = PriorityQueue::new();
+
+        pq.insert(6);
+        pq.insert(2);
+        pq.insert(3);
+        pq.insert(1);
+        pq.insert(8);
+
+        assert_eq!(pq.remove_max(), Some(8));
+        assert_eq!(pq.remove_max(), Some(6));
+        assert_eq!(pq.remove_max(), Some(3));
+        assert_eq!(pq.remove_max(), Some(2));
+        assert_eq!(pq.remove_max(), Some(1));
     }
 
     #[test]
