@@ -9,9 +9,11 @@ impl<T> PriorityQueue<T> where T: Ord + Eq + PartialEq {
 
     pub fn remove_max(&mut self) -> Option<T> {
         let len = self.0.len();
-        if len == 0 { return None; }
-
-        let vec = &mut self.0;
+        let PriorityQueue(vec) = match len {
+            0 => { return None; }
+            1 => { return self.0.pop(); }
+            _ => self
+        };
 
         vec.swap(0, len - 1);
 
@@ -24,7 +26,8 @@ impl<T> PriorityQueue<T> where T: Ord + Eq + PartialEq {
             let a_idx = parent_idx * 2;
             let b_idx = a_idx + 1;
 
-            if a_idx >= len {
+            if a_idx - 1 >= len {
+                println!("remove_max() stopping - {} out of bounds.", a_idx - 1);
                 break;
             }
 
@@ -47,6 +50,7 @@ impl<T> PriorityQueue<T> where T: Ord + Eq + PartialEq {
                 continue;
             }
             else {
+                println!("remove_max() stopping - Max Child Position {}, Parent Position {}", max_child_idx, parent_idx);
                 break;
             }
         }
@@ -129,6 +133,20 @@ mod tests {
     }
 
     #[test]
+    fn removal() {
+        let mut pq: PriorityQueue<i32> = PriorityQueue::new();
+
+        pq.insert(3);
+        pq.insert(2);
+        pq.insert(1);
+
+        pq.remove_max();
+
+        assert_eq!(pq.0.len(), 2);
+        assert_eq!(pq.0[0], 2);
+    }
+
+    #[test]
     fn numbers() {
         let mut pq: PriorityQueue<i32> = PriorityQueue::new();
 
@@ -145,9 +163,24 @@ mod tests {
         assert_eq!(pq.0[4], 3);
 
         assert_eq!(pq.remove_max(), Some(6));
+
+        assert_eq!(pq.0[0], 5);
+        assert_eq!(pq.0[1], 3);
+        assert_eq!(pq.0[2], 1);
+        assert_eq!(pq.0[3], 2);
+
         assert_eq!(pq.remove_max(), Some(5));
+
+        assert_eq!(pq.0[0], 3);
+        assert_eq!(pq.0[1], 2);
+        assert_eq!(pq.0[2], 1);
+
         assert_eq!(pq.remove_max(), Some(3));
+
+        assert_eq!(pq.0[0], 2);
+        assert_eq!(pq.0[1], 1);
         assert_eq!(pq.remove_max(), Some(2)); // broken
+
         assert_eq!(pq.remove_max(), Some(1));
     }
 
