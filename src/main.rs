@@ -25,14 +25,30 @@ fn spread_numbers(numbers: &mut Vec<i32>) {
 
     numbers.clear();
 
-    while let Some(node) = pq.remove_max() {
-        println!("Remove {:?}", node);
-        numbers.push(node.elem);
+    let mut max;
+    let mut next = None;
+
+    loop {
+        max = match pq.remove_max() {
+            Some(node) => node,
+            None => { break; }
+        };
+
+        numbers.push(max.elem);
+
+        next.map(|node| {
+            pq.insert(node);
+        });
+
+        next = if max.count > 1 {
+            max.count = max.count - 1;
+            Some(max)
+        } else { None }
     }
 }
 
 fn main() {
-    let mut barcodes = vec![1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 4, 4, 5];
+    let mut barcodes = vec![50, 60, 60, 60, 70];
     spread_numbers(&mut barcodes);
 
     for &number in barcodes.iter() {
